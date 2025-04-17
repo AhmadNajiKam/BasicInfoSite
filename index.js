@@ -1,26 +1,23 @@
-const http = require('http');
-const url = require('url');
-const fs = require('fs');
 
-http.createServer((req, res) => {
-  const q = url.parse(req.url, true);
-  let filename = '.' + q.pathname;
-  if (filename === './') filename = './index.html';
-  fs.readFile(filename, (err, data) => {
-    if (err) {
-      fs.readFile('./404.html', (_, data2) => {
-        res.writeHead(404, { 'content-type': 'text/html' });
-        res.write(data2);
-        return res.end();
+const express = require("express");
+const path = require("path");
+const app = express();
 
-      });
-    }
-    else {
-      res.writeHead(200, { 'content-type': 'text/html' });
-      res.write(data);
-      return res.end();
-    }
-  })
+const PORT = process.env.PORT || 3000;
 
+// Serve static files from current directory
+app.use(express.static('./'));
 
-}).listen(8080);
+// Explicitly handle main routes
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/contact-me.html', (req, res) => res.sendFile(path.join(__dirname, 'contact-me.html')));
+app.get('/about.html', (req, res) => res.sendFile(path.join(__dirname, 'about.html')));
+
+// Catch-all for undefined routes
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, '404.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`My first Express app - listening on port ${PORT}!`);
+});
